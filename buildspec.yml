@@ -5,9 +5,11 @@ phases:
             docker: 18
     build:
         commands:
-            - apt-get install jq -y
-            - ContainerName="todo"
-            - ImageURI=$(cat imageDetail.json | jq -r '.ImageURI')
+            - npm run install
+            - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 198670293104.dkr.ecr.ap-south-1.amazonaws.com
+            - docker build -t demo-docker .
+            - docker tag demo-docker:latest 198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker:latest
+            - docker push 198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker:latest
             - printf '[{"name":"demo-docker","imageUri":"198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker"}]' > imagedefinitions.json
             - sed -i -e "s|CONTAINER_NAME|$ContainerName|g" imagedefinitions.json
             - sed -i -e "s|IMAGE_URI|$ImageURI|g" imagedefinitions.json
