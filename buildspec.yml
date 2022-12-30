@@ -2,11 +2,25 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+    docker: 18
+    nodejs: 10
+  pre_build:  
     commands:
+      - echo installing Dependencies
       - npm install
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 198670293104.dkr.ecr.ap-south-1.amazonaws.com
   build:
     commands:
-      - npm test
+      - echo testing 
+      - npm run test
+      - npm run build
+      - docker build -t demo-docker .
+      - docker tag demo-docker:latest 198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker:latest
+  post_build:
+     commands:
+      - echo pushing the docker image
+      - docker push 198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker:latest
 artifacts:
   files:
     - imagedefinitions.json
