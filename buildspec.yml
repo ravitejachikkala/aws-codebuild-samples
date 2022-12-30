@@ -1,26 +1,18 @@
 version: 0.2
-
 phases:
-  install:
-    runtime-versions:
-    docker: 18
-    nodejs: 10
-  pre_build:  
-    commands:
-      - echo installing Dependencies
-      - npm install
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 198670293104.dkr.ecr.ap-south-1.amazonaws.com
-  build:
-    commands:
-      - echo testing 
-      - npm run test
-      - npm run build
-      - docker build -t demo-docker .
-      - docker tag demo-docker:latest 198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker:latest
-  post_build:
-     commands:
-      - echo pushing the docker image
-      - docker push 198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker:latest
+    install:
+        runtime-versions:
+            docker: 18
+    build:
+        commands:
+            - apt-get install jq -y
+            - ContainerName="todo"
+            - ImageURI=$(cat imageDetail.json | jq -r '.ImageURI')
+            - printf '[{"name":"demo-docker","imageUri":"198670293104.dkr.ecr.ap-south-1.amazonaws.com/demo-docker"}]' > imagedefinitions.json
+            - sed -i -e "s|CONTAINER_NAME|$ContainerName|g" imagedefinitions.json
+            - sed -i -e "s|IMAGE_URI|$ImageURI|g" imagedefinitions.json
+            - cat imagedefinitions.json
+
 artifacts:
-  files:
-    - imagedefinitions.json
+    files:
+        - imagedefinitions.json
